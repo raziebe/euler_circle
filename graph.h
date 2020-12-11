@@ -13,7 +13,6 @@ class Graph {
 	int m_nr_nodes;
 	list<NodeHead_t*> m_headnode_list;
 	vector<int> m_circle_path;
-	vector<int> m_full_circle;
 	list < vector<int> > sub_circles; // nested list of circles
 	int m_directed_edges;
 

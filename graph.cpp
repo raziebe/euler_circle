@@ -328,11 +328,6 @@ void Graph::print_sub_path(const char *prefix)
 	cout << "]" << endl;
 }
 
-void Graph::print_euler_vector()
-{
-	dump_vector(m_full_circle);
-}
-
 /*
  * find a commin vertex on each subcircle 
  * and unify
