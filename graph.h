@@ -28,6 +28,7 @@ private:
 	int   handle_circle();
 	void  construct_full_circle();
 	void  dump_vector(vector<int>& vec);
+	int   find_some_circle_vertex();
 public:
 	Graph() { m_directed_edges = 0 ;}
 	void  print_sub_path();

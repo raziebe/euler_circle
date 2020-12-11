@@ -213,12 +213,25 @@ int Graph::handle_circle()
 	vector<int>::iterator it = m_circle_path.begin();
 
 	for (;it != m_circle_path.end(); ++it){
-		
 		if (row_degree((*it)) > 0)
 			return *it;
 	}
 	return 0;
 }
+
+int Graph::find_some_circle_vertex()
+{
+	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
+	NodeHead_t* rowHead = NULL;
+
+	for (;it != m_headnode_list.end(); ++it){
+		rowHead = (*it);
+		if (rowHead->degree() > 0)
+			return rowHead->id();
+	}
+	return -1;
+}
+
 
 int Graph::do_dfs(int v1)
 {
@@ -227,8 +240,14 @@ int Graph::do_dfs(int v1)
 
 	for (;it != m_headnode_list.end(); ++it){
 		rowHead = (*it);
-		if (rowHead->id() == v1)
+		if (rowHead->id() == v1){
 			break;	
+		}
+	}
+	if (it == m_headnode_list.end() ){
+		// We did not find any connecting vertex
+		cout << "reached an empty" << endl;
+		return -1;
 	}
 
 	if (rowHead->empty()) {
@@ -245,13 +264,14 @@ int Graph::do_dfs(int v1)
 		}
 		
 		m_circle_path.clear();
-		return do_dfs(v1);
+		if (!do_dfs(v1))
+			return 0;
+		 /*
+		  * We have disconnected circles. find them 
+		 */
+		return do_dfs(find_some_circle_vertex());
 	}
-	
-	if (it == m_headnode_list.end()) {
-		cout << "insane. not nodes" << endl;
-		return -1;
-	}
+
 
 	m_circle_path.push_back(v1);
 
@@ -262,7 +282,7 @@ int Graph::do_dfs(int v1)
 		cout << "insane ,failed to find adjacent vertex" << endl;	
 	}
 
-	cout << "Edge (" << v1 << ","  << v2  << ")"   << endl;
+//	cout << "Edge (" << v1 << ","  << v2  << ")"   << endl;
 
 	return do_dfs(v2);
 }
@@ -270,9 +290,14 @@ int Graph::do_dfs(int v1)
 int Graph::dfs()
 {
 	NodeHead_t* rowHead = m_headnode_list.front();
-	do_dfs(rowHead->id());
-	construct_full_circle();
+	int v;
 
+	while ( (v = find_some_circle_vertex()) > 0) {	
+		do_dfs(v);
+	}
+	
+	construct_full_circle();
+	
 	m_circle_path.clear();
 	m_circle_path = sub_circles.front();
 	sub_circles.pop_front();
@@ -283,9 +308,9 @@ void Graph::print_sub_path()
 {
 	vector<int>::iterator it = m_circle_path.begin();
 
-	cout << endl <<  "[";
+	cout << endl <<  "[ ";
 	for (;it != m_circle_path.end(); ++it){
-		cout <<  (*it) << "," ;
+		cout <<  (*it) << " " ;
 	}
 	cout << "]" << endl;
 }
@@ -315,11 +340,9 @@ void Graph::construct_full_circle()
 
 	vector<int>& vec2 = *vec2_itr;
 
- 	
-	cout << "XXXXXXXXXXXXX" << sub_circles.size() << endl;
 	dump_vector(vec1);
 	dump_vector(vec2);
-	cout << "YYYYYYYYYYYYY" << endl;
+
 
 	vector<int>::iterator it1;
 	vector<int>::iterator it2;

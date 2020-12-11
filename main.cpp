@@ -36,8 +36,7 @@ int main(int argc, char* argv[])
 		cout << "No Euler Circle for me" << endl;
 		return 1;
 	}
-	
+//	G.dump();
 	G.dfs();
-	G.print_euler_vector();
 }
 
