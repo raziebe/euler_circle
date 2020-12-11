@@ -14,6 +14,9 @@
 #include <iostream>
 #include "json/cJSON.h"
 
+#include<vector>
+#include<iostream>
+#include<algorithm>
 
 #include "node.h"
 #include "graph.h"
@@ -40,7 +43,7 @@ bool Graph::has_euler_circle()
 
 
 
-char* Graph::cJSON_readFile(char *fname)
+char* Graph::cjson_readFile(char *fname)
 {
         int fd;
         char *data;
@@ -85,7 +88,7 @@ int Graph::parseCoordStr(char *p,int Coords[])
 bool  Graph::init(char *json_name)
 {
 
-	char* fileData = cJSON_readFile(json_name);
+	char* fileData = cjson_readFile(json_name);
 	
 	cJSON* tree = cJSON_Parse(fileData);
 	if (!tree) {
@@ -145,6 +148,18 @@ void Graph::dump()
 	cout << endl;
 }
 
+void Graph::dump_vector(vector<int>& vec)
+{
+	vector<int>::iterator it;
+ 		
+	// solder two circles to one.
+       	for (it = vec.begin(); it != vec.end(); it++) { 
+		cout << *it << ":";		
+	}
+	cout << endl;
+}	
+
+
 bool Graph::remove_vertex_from_row(int row,int val)
 {
 	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
@@ -195,7 +210,7 @@ int Graph::row_degree(int row)
 */
 int Graph::handle_circle()
 {
-	list<int>::iterator it = m_circle_path.begin();
+	vector<int>::iterator it = m_circle_path.begin();
 
 	for (;it != m_circle_path.end(); ++it){
 		
@@ -205,7 +220,7 @@ int Graph::handle_circle()
 	return 0;
 }
 
-int Graph::DoDFS(int v1)
+int Graph::do_dfs(int v1)
 {
 	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
 	NodeHead_t* rowHead = NULL;
@@ -220,16 +235,17 @@ int Graph::DoDFS(int v1)
 		/*
 		 * We have a circle
 		*/
-		if (m_circle_path.size()  == graph_size()) {
+		print_sub_path();
+		sub_circles.push_back(m_circle_path);
+		v1 = handle_circle();
+		if (v1 == 0) {  
+			// End of scan. graph is empty from edges
+			m_circle_path.clear();
 			return 0;
 		}
-		v1 = handle_circle();
-		if (v1 == 0)
-			return 0;
-		print_path();
-		m_circle_path.clear();
 		
-		return DoDFS(v1);
+		m_circle_path.clear();
+		return do_dfs(v1);
 	}
 	
 	if (it == m_headnode_list.end()) {
@@ -247,30 +263,100 @@ int Graph::DoDFS(int v1)
 	}
 
 	cout << "Edge (" << v1 << ","  << v2  << ")"   << endl;
-	//sleep(1);
-	int rc = DoDFS(v2);
-	if (rc < 0)
-		return -1;
-	return 0;
+
+	return do_dfs(v2);
 }
 
 int Graph::dfs()
 {
 	NodeHead_t* rowHead = m_headnode_list.front();
-	DoDFS(rowHead->id());
+	do_dfs(rowHead->id());
+	construct_full_circle();
 
+	m_circle_path.clear();
+	m_circle_path = sub_circles.front();
+	sub_circles.pop_front();
+	print_sub_path();
 }
 
-
-void Graph::print_path()
+void Graph::print_sub_path()
 {
-	list<int>::iterator it = m_circle_path.begin();
-
-	int t = m_circle_path.front();
+	vector<int>::iterator it = m_circle_path.begin();
 
 	cout << endl <<  "[";
 	for (;it != m_circle_path.end(); ++it){
 		cout <<  (*it) << "," ;
 	}
-	cout << t << "]" << endl;
+	cout << "]" << endl;
 }
+
+void Graph::print_euler_vector()
+{
+	dump_vector(m_full_circle);
+}
+/*
+ * find a commin vertex on each subcircle 
+ * and unify
+*/
+void Graph::construct_full_circle()
+{
+	list<vector<int> >::iterator vec1_itr; 
+	vec1_itr = sub_circles.begin(); 
+
+	if (vec1_itr == sub_circles.end())
+		return;
+	
+	vector<int>& vec1 = *vec1_itr;
+	list<vector<int> >::iterator vec2_itr = vec1_itr;
+	vec2_itr++;
+
+	if (vec2_itr == sub_circles.end())
+		return;
+
+	vector<int>& vec2 = *vec2_itr;
+
+ 	
+	cout << "XXXXXXXXXXXXX" << sub_circles.size() << endl;
+	dump_vector(vec1);
+	dump_vector(vec2);
+	cout << "YYYYYYYYYYYYY" << endl;
+
+	vector<int>::iterator it1;
+	vector<int>::iterator it2;
+	/*
+	* solder two sub circles to one.
+	*/
+       	for (it1 = vec1.begin(); it1 != vec1.end(); it1++) { 
+			
+		for (it2 = vec2.begin(); it2 != vec2.end() ; it2++){
+
+			if ((*it2) == (*it1)){
+
+				vector<int>* circle = new vector<int>;
+				/*		
+				* So first we must assign the same vertex
+				*  of any two sub circles
+				*/
+				int val = (*it1);
+				int dist1 = it1 - vec1.begin();
+				rotate(vec1.begin(), vec1.begin() + dist1, vec1.end() );			
+				int dist2 = it2 - vec2.begin();
+				rotate(vec2.begin(), vec2.begin() + dist2, vec2.end() );			
+
+				// Merge 					
+				circle->insert(circle->end(), vec1.begin(), vec1.end());	
+				circle->insert(circle->end(), vec2.begin(), vec2.end());	
+				circle->push_back(val);
+
+				// Prep for Next Iter
+				sub_circles.erase(vec1_itr);
+				sub_circles.erase(vec2_itr);
+				sub_circles.push_back(*circle);
+				construct_full_circle();
+				// Do not iterate here. vector are garbled now
+				return;
+			}
+		}
+	}
+}
+
