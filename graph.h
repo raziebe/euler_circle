@@ -20,11 +20,12 @@ private:
 	bool  remove_vertex_from_row(int row,int val);
 	void  push_edge_back(int row,int val);
 	int   row_degree(int row);
+	int   handle_circle();
 public:
 	Graph() { m_directed_edges = 0 ;}
 	void  print_path();
 	int   graph_size() {return m_directed_edges/2;}
-	int   init(char *json_name);
+	bool   init(char *json_name);
 	void  add_HeadNode(NodeHead_t *hd);
 	void  dump();
 	bool  has_euler_circle();

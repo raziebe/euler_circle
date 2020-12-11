@@ -23,14 +23,15 @@ int main(int argc, char* argv[])
 	Graph G;
 
 	if (argc < 1){
-		cout << argv[0] <<  "  <polygons.json>" << endl;
+		cout << argv[0] <<  "  <graph.json>" << endl;
 		return -1;
 	}
 
-	G.init(argv[1]);
-	G.dump();
-
-
+	if (!G.init(argv[1])){
+		cout << "failed ot parse json" << endl;
+		return -1;
+	}
+	cout << "Graph has " << G.graph_size() << "edges." << endl ;
 	if (!G.has_euler_circle()){
 		cout << "No Euler Circle for me" << endl;
 		return 1;

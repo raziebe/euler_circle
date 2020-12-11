@@ -47,20 +47,20 @@ char* Graph::cJSON_readFile(char *fname)
         struct stat buf;
 
         if (stat(fname, &buf) < 0){
-                printf("Failed to stat %s %s\n",fname,strerror(errno));
+       		cout << "Failed to stat" << fname << " " << strerror(errno);
                 return NULL;
         }
 
         fd = open(fname,O_RDONLY);
         if (fd < 0){
-       		printf("Failed to open %s %s\n",fname,strerror(errno));
+       		cout << "Failed to open" << fname << " " << strerror(errno);
        		return NULL;
         }
 
         data = (char *)malloc(buf.st_size);
         memset(data,0x00,buf.st_size);
         if (read(fd,data,buf.st_size) < buf.st_size){
-       		printf("Failed to read %s %s\n",fname,strerror(errno));
+       		cout << "Failed to read" << fname << " " << strerror(errno);
                 return NULL;
         }
         close(fd);
@@ -82,21 +82,21 @@ int Graph::parseCoordStr(char *p,int Coords[])
 }
 
 
-int  Graph::init(char *json_name)
+bool  Graph::init(char *json_name)
 {
 
 	char* fileData = cJSON_readFile(json_name);
 	
 	cJSON* tree = cJSON_Parse(fileData);
 	if (!tree) {
-		printf("%s failed parsing\n",json_name);
-		return 1;
+		cout << " failed parsing " << json_name << endl;
+		return false;
 	}
 
 	cJSON* polys = cJSON_GetObjectItem(tree, "polygon");
 	if (!polys) {
-		printf("Failed to retrieve polyong from json\n");
-		return -1;
+		cout << "Failed to retrieve polyong from json" << endl;
+		return false;
 	}
 
 	int nr_nodes = cJSON_GetArraySize(polys);
@@ -107,8 +107,8 @@ int  Graph::init(char *json_name)
 
 		cJSON* NodeItem = cJSON_GetArrayItem(polys, i);
 		if (!NodeItem) {
-			printf("Failed to retrieve node %d from json\n",i);
-			return -1;
+			cout << "Failed to retrieve node" << i << "from json" << endl;
+			return false;
 		}
 		
 		cJSON *Node  =  cJSON_GetObjectItem(NodeItem, "node");
@@ -126,12 +126,13 @@ int  Graph::init(char *json_name)
 	free(fileData);
 	cJSON_Delete(tree);
 
-	return 0;
+	return true;
 }
 
 
 void Graph::dump()
 {
+	cout << "Total edges " << graph_size() << endl;
 	for (list<NodeHead_t *>::iterator it = m_headnode_list.begin(); 
 		it != m_headnode_list.end(); ++it){
 
@@ -184,10 +185,25 @@ int Graph::row_degree(int row)
 			return rowHead->degree();	
 		}
 	}
-	cout << __func__ << " insane" << endl;
+	cout << __func__ << " insane " << endl;
 	return 0;
 }
 
+/*
+ * walk on the sub circle, find 
+ * any vetex with edges and create a new circle
+*/
+int Graph::handle_circle()
+{
+	list<int>::iterator it = m_circle_path.begin();
+
+	for (;it != m_circle_path.end(); ++it){
+		
+		if (row_degree((*it)) > 0)
+			return *it;
+	}
+	return 0;
+}
 
 int Graph::DoDFS(int v1)
 {
@@ -201,41 +217,23 @@ int Graph::DoDFS(int v1)
 	}
 
 	if (rowHead->empty()) {
-
-		cout << "empty row left with " 
-				<<  m_circle_path.size()  << 
-				" vertices of total "  << graph_size()  << endl;
-
+		/*
+		 * We have a circle
+		*/
 		if (m_circle_path.size()  == graph_size()) {
-		//	cout << "Reached an empty row left with " 
-		//		<<  m_circle_path.size()  << 
-		//		" vertices of total "  << graph_size()  << endl;
 			return 0;
 		}
-
-		/*
-		* Reached a circle , revert circle path
-		* up to the vertex that has an alternative path
-		*	v1 - last vertex
-		*	v2 - head of circle path	 
-		*/
-		int v2;
-		do {
-			v2 = m_circle_path.back();		
-			m_circle_path.pop_back();
-			cout << "revert path " << v1 << " " <<  v2 << endl;	
-			/* put back edges into graph */
-			push_edge_back(v1, v2);
-			push_edge_back(v2, v1);
-			
-			dump();
-			v1 = v2;
-		} while (row_degree(v2) == 1);
-		return DoDFS(v2);
+		v1 = handle_circle();
+		if (v1 == 0)
+			return 0;
+		print_path();
+		m_circle_path.clear();
+		
+		return DoDFS(v1);
 	}
 	
 	if (it == m_headnode_list.end()) {
-		cout << "insane" << endl;
+		cout << "insane. not nodes" << endl;
 		return -1;
 	}
 
@@ -249,7 +247,7 @@ int Graph::DoDFS(int v1)
 	}
 
 	cout << "Edge (" << v1 << ","  << v2  << ")"   << endl;
-	sleep(1);
+	//sleep(1);
 	int rc = DoDFS(v2);
 	if (rc < 0)
 		return -1;
