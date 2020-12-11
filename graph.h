@@ -29,9 +29,11 @@ private:
 	void  construct_full_circle();
 	void  dump_vector(vector<int>& vec);
 	int   find_some_circle_vertex();
+	void  strip_doubles();
+
 public:
 	Graph() { m_directed_edges = 0 ;}
-	void  print_sub_path();
+	void  print_sub_path(const char *);
 
 	void  print_euler_vector();
 	void  print_full_circle();

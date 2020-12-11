@@ -142,9 +142,7 @@ void Graph::dump()
 		NodeHead_t *n = (*it);
 		cout << "Node " << n->id() << " vertices:" << endl;
 		n->dump();
-		
 	}
-
 	cout << endl;
 }
 
@@ -254,7 +252,7 @@ int Graph::do_dfs(int v1)
 		/*
 		 * We have a circle
 		*/
-		print_sub_path();
+		print_sub_path("Euler sub-circle ");
 		sub_circles.push_back(m_circle_path);
 		v1 = handle_circle();
 		if (v1 == 0) {  
@@ -287,6 +285,20 @@ int Graph::do_dfs(int v1)
 	return do_dfs(v2);
 }
 
+void Graph::strip_doubles()
+{
+	vector<int>::iterator it = m_circle_path.begin();
+
+	for (;it != m_circle_path.end(); ){
+		vector<int>::iterator itn = it;
+		itn++;
+		if ((*itn) == (*it))
+			it = m_circle_path.erase(it);
+		else
+			++it;
+	}
+}
+
 int Graph::dfs()
 {
 	NodeHead_t* rowHead = m_headnode_list.front();
@@ -297,18 +309,19 @@ int Graph::dfs()
 	}
 	
 	construct_full_circle();
-	
+
 	m_circle_path.clear();
 	m_circle_path = sub_circles.front();
+	strip_doubles();		
 	sub_circles.pop_front();
-	print_sub_path();
+	print_sub_path("Full eu circle");
 }
 
-void Graph::print_sub_path()
+void Graph::print_sub_path(const char *prefix)
 {
 	vector<int>::iterator it = m_circle_path.begin();
 
-	cout << endl <<  "[ ";
+	cout << endl <<  prefix <<  " [ ";
 	for (;it != m_circle_path.end(); ++it){
 		cout <<  (*it) << " " ;
 	}
@@ -319,6 +332,7 @@ void Graph::print_euler_vector()
 {
 	dump_vector(m_full_circle);
 }
+
 /*
  * find a commin vertex on each subcircle 
  * and unify
@@ -340,10 +354,6 @@ void Graph::construct_full_circle()
 
 	vector<int>& vec2 = *vec2_itr;
 
-	dump_vector(vec1);
-	dump_vector(vec2);
-
-
 	vector<int>::iterator it1;
 	vector<int>::iterator it2;
 	/*
@@ -363,14 +373,16 @@ void Graph::construct_full_circle()
 				int val = (*it1);
 				int dist1 = it1 - vec1.begin();
 				rotate(vec1.begin(), vec1.begin() + dist1, vec1.end() );			
+			
+
 				int dist2 = it2 - vec2.begin();
 				rotate(vec2.begin(), vec2.begin() + dist2, vec2.end() );			
-
+		
+				
 				// Merge 					
 				circle->insert(circle->end(), vec1.begin(), vec1.end());	
 				circle->insert(circle->end(), vec2.begin(), vec2.end());	
 				circle->push_back(val);
-
 				// Prep for Next Iter
 				sub_circles.erase(vec1_itr);
 				sub_circles.erase(vec2_itr);
