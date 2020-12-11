@@ -1,0 +1,84 @@
+{
+"polygon" : [
+	{
+		"node": 1,
+		"neighbours": "2,5"
+	},
+	{
+		
+		"node": 2,
+		"neighbours": "5,3,4,1,10,9"
+	},
+	{
+		
+		"node": 3,
+		"neighbours": "2,4,5,6,15,17"
+	},
+	{
+		
+		"node": 4 ,
+		"neighbours": "2,3,5,6,13,14"
+	},
+	{
+		
+		"node": 5 ,
+		"neighbours": "1,2,3,4,11,12"
+	},
+	{
+		
+		"node": 6 ,
+		"neighbours": "7,8,3,4"
+	},
+	{
+		
+		"node": 7 ,
+		"neighbours": "6,8"
+	},
+	{
+		
+		"node": 8 ,
+		"neighbours": "7,6"
+	},
+	{
+		
+		"node": 9 ,
+		"neighbours": "10,2"
+	},
+	{
+		
+		"node": 10 ,
+		"neighbours": "9,2"
+	},
+	{
+		
+		"node": 11 ,
+		"neighbours": "5,12"
+	},
+	{
+		
+		"node": 12 ,
+		"neighbours": "5,11"
+	},
+	{
+		
+		"node": 13 ,
+		"neighbours": "4,14"
+	},
+	{
+		"node": 14 ,
+		"neighbours": "4,13"
+	},
+	{
+		"node": 15 ,
+		"neighbours": "3,16"
+	},
+	{
+		"node": 16 ,
+		"neighbours": "15,17"
+	},
+	{
+		"node": 17 ,
+		"neighbours": "3,16"
+	}
+]
+}
