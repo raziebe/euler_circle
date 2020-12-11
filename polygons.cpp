@@ -28,11 +28,15 @@ int main(int argc, char* argv[])
 	}
 
 	G.init(argv[1]);
-	G.Dump();
+	G.dump();
 
-	G.DFS();
-	if (!G.hasEulerCircle()){
+
+	if (!G.has_euler_circle()){
 		cout << "No Euler Circle for me" << endl;
+		return 1;
 	}
+	
+	G.dfs();
+	G.print_path();
 }
 

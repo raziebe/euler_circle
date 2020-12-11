@@ -23,11 +23,10 @@ public:
 
 
 
-class NodeHead_t{
+class NodeHead_t {
 
 	int m_id;
-	int  m_nr_neigh;
-
+	int  m_degree;
 	list<node_t *> m_neigh_list;
 public:
 
@@ -37,15 +36,15 @@ public:
 
 	NodeHead_t(int id,int nr_neigh){
 		m_id = id;
-		m_nr_neigh = nr_neigh;
+		m_degree = nr_neigh;
 	}
 	
 	int id() { return m_id;}
-	int get_neigh_nr() { return m_neigh_list.size(); }
+	int degree() { return m_neigh_list.size(); }
 
-	void set_neigh(int _neigh[]){
+	void set_neighbours(int _neigh[]){
 
-		for (int i = 0; i < m_nr_neigh; i++) {
+		for (int i = 0; i < m_degree; i++) {
 			node_t *neigh = new node_t(_neigh[i]);
 			m_neigh_list.push_back(neigh);
 		}
@@ -58,6 +57,7 @@ public:
 		for (; it != m_neigh_list.end(); it++) {
 			if (val == (*it)->id()){
 				m_neigh_list.erase(it);
+				// should free memory here.
 				return true;
 			}
 		}
@@ -65,7 +65,8 @@ public:
 		return false;
 	}
 
-	int erase_front(){
+	int erase_front()
+	{
 		node_t* n = m_neigh_list.front();
 		int val = n->id();
 		m_neigh_list.pop_front();
@@ -74,6 +75,11 @@ public:
 
 	bool empty() {
 		return m_neigh_list.empty();
+	}
+
+	void push_back(int val){
+		node_t *n = new node_t(val);
+		m_neigh_list.push_back(n);
 	}
 
 	void dump() {

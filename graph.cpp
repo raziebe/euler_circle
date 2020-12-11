@@ -21,17 +21,16 @@
 
 using namespace std;
 
-bool Graph::hasEulerCircle()
+bool Graph::has_euler_circle()
 {
 
 	// Recur for all the vertices adjacent to this vertex 
-	list<NodeHead_t*> m_headnode_list;
-
 	for (list<NodeHead_t *>::iterator it = m_headnode_list.begin(); 
 		it != m_headnode_list.end(); ++it){
-		
-		NodeHead_t *x = *it;
-		if ( (x->get_neigh_nr() % 2))
+
+		NodeHead_t *nh = *it;
+
+		if ( (nh->degree() % 2))
 			return false;
 	}
 
@@ -117,7 +116,7 @@ int  Graph::init(char *json_name)
 
 		int nr_neigh = parseCoordStr(Neighbours->valuestring, temp_neigh);
 		NodeHead_t *n = new NodeHead_t(Node->valueint, nr_neigh);
-		n->set_neigh(temp_neigh);
+		n->set_neighbours(temp_neigh);
 		m_headnode_list.push_back(n);
 		update_graph_size(nr_neigh);
 
@@ -131,7 +130,7 @@ int  Graph::init(char *json_name)
 }
 
 
-void Graph::Dump()
+void Graph::dump()
 {
 	for (list<NodeHead_t *>::iterator it = m_headnode_list.begin(); 
 		it != m_headnode_list.end(); ++it){
@@ -145,7 +144,7 @@ void Graph::Dump()
 	cout << endl;
 }
 
-bool Graph::RemoveVertexFromRow(int row,int val)
+bool Graph::remove_vertex_from_row(int row,int val)
 {
 	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
 	NodeHead_t* rowHead;
@@ -159,7 +158,37 @@ bool Graph::RemoveVertexFromRow(int row,int val)
 	return false;
 }
 
-// Scan all edges
+void Graph::push_edge_back(int row,int val)
+{
+	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
+	NodeHead_t* rowHead = NULL;
+
+	for (;it != m_headnode_list.end(); ++it){
+		rowHead = (*it);
+		if (rowHead->id() == row) {
+			rowHead->push_back(val);
+			return;	
+		}
+	}
+}
+
+
+int Graph::row_degree(int row)
+{
+	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
+	NodeHead_t* rowHead = NULL;
+
+	for (;it != m_headnode_list.end(); ++it){
+		rowHead = (*it);
+		if (rowHead->id() == row) {
+			return rowHead->degree();	
+		}
+	}
+	cout << __func__ << " insane" << endl;
+	return 0;
+}
+
+
 int Graph::DoDFS(int v1)
 {
 	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
@@ -170,13 +199,39 @@ int Graph::DoDFS(int v1)
 		if (rowHead->id() == v1)
 			break;	
 	}
-	
+
 	if (rowHead->empty()) {
-		cout << "Reached an empty row left with " 
-			<<  m_circle_path.size()  << 
-			" vertices of total "  << graph_size()  << endl;
-		Dump();
-		return 0;
+
+		cout << "empty row left with " 
+				<<  m_circle_path.size()  << 
+				" vertices of total "  << graph_size()  << endl;
+
+		if (m_circle_path.size()  == graph_size()) {
+		//	cout << "Reached an empty row left with " 
+		//		<<  m_circle_path.size()  << 
+		//		" vertices of total "  << graph_size()  << endl;
+			return 0;
+		}
+
+		/*
+		* Reached a circle , revert circle path
+		* up to the vertex that has an alternative path
+		*	v1 - last vertex
+		*	v2 - head of circle path	 
+		*/
+		int v2;
+		do {
+			v2 = m_circle_path.back();		
+			m_circle_path.pop_back();
+			cout << "revert path " << v1 << " " <<  v2 << endl;	
+			/* put back edges into graph */
+			push_edge_back(v1, v2);
+			push_edge_back(v2, v1);
+			
+			dump();
+			v1 = v2;
+		} while (row_degree(v2) == 1);
+		return DoDFS(v2);
 	}
 	
 	if (it == m_headnode_list.end()) {
@@ -184,21 +239,40 @@ int Graph::DoDFS(int v1)
 		return -1;
 	}
 
-	// Remove second vertex from neightbours roww
+	m_circle_path.push_back(v1);
+
+	/* Remove second vertex from neightbours row */
 	int v2 = rowHead->erase_front();
-	// Remove first vertex from the next row
-	if (!RemoveVertexFromRow(v2, v1)){
+	/* Remove first vertex from the next row */
+	if (!remove_vertex_from_row(v2, v1)){
 		cout << "insane ,failed to find adjacent vertex" << endl;	
 	}
-	m_circle_path.push_back(v1);
-	m_circle_path.push_back(v2);
+
 	cout << "Edge (" << v1 << ","  << v2  << ")"   << endl;
-	DoDFS(v2);
+	sleep(1);
+	int rc = DoDFS(v2);
+	if (rc < 0)
+		return -1;
+	return 0;
 }
 
-int Graph::DFS()
+int Graph::dfs()
 {
 	NodeHead_t* rowHead = m_headnode_list.front();
 	DoDFS(rowHead->id());
 
+}
+
+
+void Graph::print_path()
+{
+	list<int>::iterator it = m_circle_path.begin();
+
+	int t = m_circle_path.front();
+
+	cout << endl <<  "[";
+	for (;it != m_circle_path.end(); ++it){
+		cout <<  (*it) << "," ;
+	}
+	cout << t << "]" << endl;
 }
