@@ -24,14 +24,14 @@
 
 using namespace std;
 
-bool Graph::has_euler_circle()
+bool graph_t::has_euler_circle()
 {
 
 	// Recur for all the vertices adjacent to this vertex 
-	for (list<NodeHead_t *>::iterator it = m_headnode_list.begin(); 
+	for (list<nodehead_t *>::iterator it = m_headnode_list.begin(); 
 		it != m_headnode_list.end(); ++it){
 
-		NodeHead_t *nh = *it;
+		nodehead_t *nh = *it;
 
 		if ( (nh->degree() % 2))
 			return false;
@@ -43,7 +43,7 @@ bool Graph::has_euler_circle()
 
 
 
-char* Graph::cjson_readFile(char *fname)
+char* graph_t::cjson_readFile(char *fname)
 {
         int fd;
         char *data;
@@ -70,7 +70,7 @@ char* Graph::cjson_readFile(char *fname)
         return data;
 }
 
-int Graph::parseCoordStr(char *p,int Coords[])
+int graph_t::parseCoordStr(char *p,int Coords[])
 {
         int i = 0;
         char *s,*e;
@@ -85,7 +85,7 @@ int Graph::parseCoordStr(char *p,int Coords[])
 }
 
 
-bool  Graph::init(char *json_name)
+bool  graph_t::init(char *json_name)
 {
 
 	char* fileData = cjson_readFile(json_name);
@@ -118,10 +118,10 @@ bool  Graph::init(char *json_name)
 		cJSON *Neighbours  =  cJSON_GetObjectItem(NodeItem, "neighbours");
 
 		int nr_neigh = parseCoordStr(Neighbours->valuestring, temp_neigh);
-		NodeHead_t *n = new NodeHead_t(Node->valueint, nr_neigh);
+		nodehead_t *n = new nodehead_t(Node->valueint, nr_neigh);
 		n->set_neighbours(temp_neigh);
 		m_headnode_list.push_back(n);
-		update_graph_size(nr_neigh);
+		update_graph_t_size(nr_neigh);
 
 	}
 	cout << endl;
@@ -133,20 +133,20 @@ bool  Graph::init(char *json_name)
 }
 
 
-void Graph::dump()
+void graph_t::dump()
 {
-	cout << "Total edges " << graph_size() << endl;
-	for (list<NodeHead_t *>::iterator it = m_headnode_list.begin(); 
+	cout << "Total edges " << graph_t_size() << endl;
+	for (list<nodehead_t *>::iterator it = m_headnode_list.begin(); 
 		it != m_headnode_list.end(); ++it){
 
-		NodeHead_t *n = (*it);
+		nodehead_t *n = (*it);
 		cout << "Node " << n->id() << " vertices:" << endl;
 		n->dump();
 	}
 	cout << endl;
 }
 
-void Graph::dump_vector(vector<int>& vec)
+void graph_t::dump_vector(vector<int>& vec)
 {
 	vector<int>::iterator it;
  		
@@ -158,10 +158,10 @@ void Graph::dump_vector(vector<int>& vec)
 }	
 
 
-bool Graph::remove_vertex_from_row(int row,int val)
+bool graph_t::remove_vertex_from_row(int row,int val)
 {
-	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
-	NodeHead_t* rowHead;
+	list<nodehead_t *>::iterator it = m_headnode_list.begin();
+	nodehead_t* rowHead;
 
 	for (;it != m_headnode_list.end(); ++it){
 		rowHead = (*it);
@@ -172,10 +172,10 @@ bool Graph::remove_vertex_from_row(int row,int val)
 	return false;
 }
 
-void Graph::push_edge_back(int row,int val)
+void graph_t::push_edge_back(int row,int val)
 {
-	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
-	NodeHead_t* rowHead = NULL;
+	list<nodehead_t *>::iterator it = m_headnode_list.begin();
+	nodehead_t* rowHead = NULL;
 
 	for (;it != m_headnode_list.end(); ++it){
 		rowHead = (*it);
@@ -187,10 +187,10 @@ void Graph::push_edge_back(int row,int val)
 }
 
 
-int Graph::row_degree(int row)
+int graph_t::row_degree(int row)
 {
-	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
-	NodeHead_t* rowHead = NULL;
+	list<nodehead_t *>::iterator it = m_headnode_list.begin();
+	nodehead_t* rowHead = NULL;
 
 	for (;it != m_headnode_list.end(); ++it){
 		rowHead = (*it);
@@ -206,7 +206,7 @@ int Graph::row_degree(int row)
  * walk on the sub circle, find 
  * any vetex with edges and create a new circle
 */
-int Graph::handle_circle()
+int graph_t::handle_circle()
 {
 	vector<int>::iterator it = m_circle_path.begin();
 
@@ -217,10 +217,10 @@ int Graph::handle_circle()
 	return 0;
 }
 
-int Graph::find_some_circle_vertex()
+int graph_t::find_some_circle_vertex()
 {
-	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
-	NodeHead_t* rowHead = NULL;
+	list<nodehead_t *>::iterator it = m_headnode_list.begin();
+	nodehead_t* rowHead = NULL;
 
 	for (;it != m_headnode_list.end(); ++it){
 		rowHead = (*it);
@@ -231,10 +231,10 @@ int Graph::find_some_circle_vertex()
 }
 
 
-int Graph::do_dfs(int v1)
+int graph_t::do_dfs(int v1)
 {
-	list<NodeHead_t *>::iterator it = m_headnode_list.begin();
-	NodeHead_t* rowHead = NULL;
+	list<nodehead_t *>::iterator it = m_headnode_list.begin();
+	nodehead_t* rowHead = NULL;
 
 	for (;it != m_headnode_list.end(); ++it){
 		rowHead = (*it);
@@ -256,7 +256,7 @@ int Graph::do_dfs(int v1)
 		sub_circles.push_back(m_circle_path);
 		v1 = handle_circle();
 		if (v1 == 0) {  
-			// End of scan. graph is empty from edges
+			// End of scan. graph_t is empty from edges
 			m_circle_path.clear();
 			return 0;
 		}
@@ -285,7 +285,7 @@ int Graph::do_dfs(int v1)
 	return do_dfs(v2);
 }
 
-void Graph::strip_doubles()
+void graph_t::strip_doubles()
 {
 	vector<int>::iterator it = m_circle_path.begin();
 
@@ -299,9 +299,9 @@ void Graph::strip_doubles()
 	}
 }
 
-int Graph::dfs()
+int graph_t::dfs()
 {
-	NodeHead_t* rowHead = m_headnode_list.front();
+	nodehead_t* rowHead = m_headnode_list.front();
 	int v;
 
 	while ( (v = find_some_circle_vertex()) > 0) {	
@@ -317,7 +317,7 @@ int Graph::dfs()
 	print_sub_path("Full eu circle");
 }
 
-void Graph::print_sub_path(const char *prefix)
+void graph_t::print_sub_path(const char *prefix)
 {
 	vector<int>::iterator it = m_circle_path.begin();
 
@@ -332,7 +332,7 @@ void Graph::print_sub_path(const char *prefix)
  * find a commin vertex on each subcircle 
  * and unify
 */
-void Graph::construct_full_circle()
+void graph_t::construct_full_circle()
 {
 	list<vector<int> >::iterator vec1_itr; 
 	vec1_itr = sub_circles.begin(); 

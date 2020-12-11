@@ -4,20 +4,18 @@
 #include <list>
 #include <vector>
 
-#define MAX_SUBCIRCLES 100
-
 using namespace std;
 
-class Graph {
+class graph_t {
 
 	int m_nr_nodes;
-	list<NodeHead_t*> m_headnode_list;
+	list<nodehead_t*> m_headnode_list;
 	vector<int> m_circle_path;
 	list < vector<int> > sub_circles; // nested list of circles
 	int m_directed_edges;
 
 private:
-	void  update_graph_size(int sz) { m_directed_edges += sz;}
+	void  update_graph_t_size(int sz) { m_directed_edges += sz;}
 	char* cjson_readFile(char *fname);
 	int   parseCoordStr(char *p,int Coords[]);
 	int   do_dfs(int v);
@@ -31,14 +29,14 @@ private:
 	void  strip_doubles();
 
 public:
-	Graph() { m_directed_edges = 0 ;}
+	graph_t() { m_directed_edges = 0 ;}
 	void  print_sub_path(const char *);
 
 	void  print_euler_vector();
 	void  print_full_circle();
-	int   graph_size() {return m_directed_edges/2;}
+	int   graph_t_size() {return m_directed_edges/2;}
 	bool  init(char *json_name);
-	void  add_HeadNode(NodeHead_t *hd);
+	void  add_HeadNode(nodehead_t *hd);
 	void  dump();
 	bool  has_euler_circle();
 	int   dfs();

@@ -1,6 +1,7 @@
 EXEC = euler
 APP_OBJS = 	json/cJSON.o \
 		graph.o \
+		node.o \
 		main.o
 
 LIBS = -lpthread
