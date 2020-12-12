@@ -7,3 +7,20 @@ Execute as follows:
 
 
 Tested on Ununtu Ubuntu 16.04.6 LTS 
+
+build@ubuntu:~/shenkar/euler_circle$ ./euler graph5.json 
+
+Graph has 26 edges.
+
+Euler sub-circle  [ 1 2 5 ]
+
+Euler sub-circle  [ 2 3 4 2 10 9 ]
+
+Euler sub-circle  [ 3 5 4 6 7 8 6 3 15 16 17 ]
+
+Euler sub-circle  [ 5 11 12 ]
+
+Euler sub-circle  [ 4 13 14 ]
+
+Full eu circle [ 5 4 6 7 8 6 3 15 16 17 3 5 11 12 5 1 2 3 4 13 14 4 2 10 9 2 ]
+
